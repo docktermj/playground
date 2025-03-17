@@ -34,6 +34,7 @@ jobs:
           sudo mkdir ${OUTPUT_PATH}/certificate-authority
           sudo mkdir ${OUTPUT_PATH}/client
           sudo mkdir ${OUTPUT_PATH}/server
+          sudo chmod -R +w ${OUTPUT_PATH}
 
       # -----------------------------------------------------------------------------
       # --- Self-Signed Certificate Authority
