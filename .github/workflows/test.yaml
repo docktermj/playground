@@ -24,16 +24,16 @@ jobs:
           sudo apt-get install -y \
             tree
 
-      - name: Find *.pem files
-        run: |
-          sudo find / -name "*.pem"
+      # - name: Find *.pem files
+      #   run: |
+      #     sudo find / -name "*.pem"
 
       - name: Create directories
         run: |
-          mkdir ${OUTPUT_PATH}
-          mkdir ${OUTPUT_PATH}/certificate-authority
-          mkdir ${OUTPUT_PATH}/client
-          mkdir ${OUTPUT_PATH}/server
+          sudo mkdir ${OUTPUT_PATH}
+          sudo mkdir ${OUTPUT_PATH}/certificate-authority
+          sudo mkdir ${OUTPUT_PATH}/client
+          sudo mkdir ${OUTPUT_PATH}/server
 
       # -----------------------------------------------------------------------------
       # --- Self-Signed Certificate Authority
