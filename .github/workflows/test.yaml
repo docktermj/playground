@@ -83,7 +83,7 @@ jobs:
               -CAcreateserial \
               -CAkey ${OUTPUT_PATH}/certificate-authority/private_key.pem \
               -days 360 \
-              -extfile ${{ github.workspace }}/testdata/certificates/server/ext.conf \
+              -extfile ${{ github.workspace }}/testdata/certificates/server/ext.cnf \
               -in ${OUTPUT_PATH}/server/certificate_request.pem \
               -out ${OUTPUT_PATH}/server/certificate.pem \
               -req
@@ -115,7 +115,7 @@ jobs:
               -CAcreateserial \
               -CAkey ${OUTPUT_PATH}/certificate-authority/private_key.pem \
               -days 360 \
-              -extfile ${{ github.workspace }}/testdata/certificates/client/ext.conf \
+              -extfile ${{ github.workspace }}/testdata/certificates/client/ext.cnf \
               -in ${OUTPUT_PATH}/client/certificate_request.pem \
               -out ${OUTPUT_PATH}/client/certificate.pem \
               -req
