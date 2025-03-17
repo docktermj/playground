@@ -1,0 +1,21 @@
+name: Test workflow
+
+on: [push]
+
+permissions:
+  contents: read
+
+jobs:
+  go-test-linux:
+    name: "Test"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find *.pem files
+        run: |
+          sudo find / -name "*.pem"
