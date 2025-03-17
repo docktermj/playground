@@ -2,6 +2,9 @@ name: Test workflow
 
 on: [push]
 
+env:
+  OUTPUT_PATH: /certificates
+
 permissions:
   contents: read
 
@@ -16,6 +19,112 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y \
+            tree
+
       - name: Find *.pem files
         run: |
           sudo find / -name "*.pem"
+
+      - name: Create directories
+        run: |
+          mkdir ${OUTPUT_PATH}
+          mkdir ${OUTPUT_PATH}/certificate-authority
+          mkdir ${OUTPUT_PATH}/client
+          mkdir ${OUTPUT_PATH}/server
+
+      # -----------------------------------------------------------------------------
+      # --- Self-Signed Certificate Authority
+      # -----------------------------------------------------------------------------
+
+      - name: Generate self-signed Certificate Authority
+        run: |
+          openssl req \
+              -days 365 \
+              -keyout ${OUTPUT_PATH}/certificate-authority/private_key.pem \
+              -newkey rsa:4096 \
+              -noenc \
+              -out ${OUTPUT_PATH}/certificate-authority/certificate.pem \
+              -subj "/C=US/ST=FL/L=West Palm Beach/O=Dockter/OU=Test CA/CN=dockter.com" \
+              -x509
+
+      - name: View self-signed Certificate Authority
+        run: |
+          openssl x509 \
+              -in ${OUTPUT_PATH}/certificate-authority/certificate.pem \
+              -noout \
+              -text
+
+      # -----------------------------------------------------------------------------
+      # --- Server certificate
+      # -----------------------------------------------------------------------------
+
+      - name: Generate server certificate
+        run: |
+          openssl req \
+              -keyout ${OUTPUT_PATH}/server/private_key.pem \
+              -newkey rsa:4096 \
+              -noenc \
+              -out ${OUTPUT_PATH}/server/certificate_request.pem \
+              -subj "/C=US/ST=FL/L=West Palm Beach/O=Dockter/OU=Test Server/CN=dockter.com" \
+
+      - name: Sign server certificate
+        run: |
+          openssl x509 \
+              -CA ${OUTPUT_PATH}/certificate-authority/certificate.pem \
+              -CAcreateserial \
+              -CAkey ${OUTPUT_PATH}/certificate-authority/private_key.pem \
+              -days 360 \
+              -extfile ${OUTPUT_PATH}/server/ext.cnf \
+              -in ${OUTPUT_PATH}/server/certificate_request.pem \
+              -out ${OUTPUT_PATH}/server/certificate.pem \
+              -req
+
+      - name: View server certificate
+        run: |
+          openssl x509 \
+              -in ${OUTPUT_PATH}/server/certificate.pem \
+              -noout \
+              -text
+
+      # -----------------------------------------------------------------------------
+      # --- Client certificate
+      # -----------------------------------------------------------------------------
+
+      - name: Generate client certificate
+        run: |
+          openssl req \
+              -keyout ${OUTPUT_PATH}/client/private_key.pem \
+              -newkey rsa:4096 \
+              -noenc \
+              -out ${OUTPUT_PATH}/client/certificate_request.pem \
+              -subj "/C=US/ST=FL/L=West Palm Beach/O=Dockter/OU=Test Client/CN=dockter.com" \
+
+      - name: Sign client certificate
+        run: |
+          openssl x509 \
+              -CA ${OUTPUT_PATH}/certificate-authority/certificate.pem \
+              -CAcreateserial \
+              -CAkey ${OUTPUT_PATH}/certificate-authority/private_key.pem \
+              -days 360 \
+              -extfile ${OUTPUT_PATH}/client/ext.cnf \
+              -in ${OUTPUT_PATH}/client/certificate_request.pem \
+              -out ${OUTPUT_PATH}/client/certificate.pem \
+              -req
+
+      - name: View client certificate
+        run: |
+          openssl x509 \
+              -in ${OUTPUT_PATH}/client/certificate.pem \
+              -noout \
+              -text
+
+      # -----------------------------------------------------------------------------
+      # --- Epilog
+      # -----------------------------------------------------------------------------
+
+      - name: View certificates
+        run: |
+          tree ${OUTPUT_PATH}
