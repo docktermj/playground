@@ -72,6 +72,10 @@ jobs:
               -out ${OUTPUT_PATH}/server/certificate_request.pem \
               -subj "/C=US/ST=FL/L=West Palm Beach/O=Dockter/OU=Test Server/CN=dockter.com" \
 
+      - name: View certificates
+        run: |
+          tree ${{ github.workspace }}
+
       - name: Sign server certificate
         run: |
           openssl x509 \
