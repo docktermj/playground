@@ -1,0 +1,21 @@
+[package]
+name = "cute-clock"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+description = "A small, cute desktop clock with a blinking cat mascot."
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "cute_clock"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cute-clock"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+eframe = "0.35.0"
+jiff = "0.2.37"
