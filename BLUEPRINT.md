@@ -452,10 +452,13 @@ blink phase and the repaint schedule. The binary only wires these into an
 ### 5.2 `cute-clock/src/cli.rs`
 
 Parses the command line into `Args` (section 6.1.2) with `clap`'s derive API.
-The only option is the boolean flag `--12h` (field `twelve_hour`), plus the
-`--help`/`-h` and `--version`/`-V` flags `clap` adds. `Args::hour_format`
-maps the flag to `HourFormat::Twelve` when set and `HourFormat::TwentyFour`
-otherwise. Any unknown flag or any positional argument is a usage error.
+The options are the boolean flags `--12h` (field `twelve_hour`) and `--24h`
+(field `twenty_four_hour`), plus the `--help`/`-h` and `--version`/`-V` flags
+`clap` adds. `--24h` conflicts with `--12h`, so both are never set.
+`Args::hour_format` maps `--12h` to `HourFormat::Twelve` when set and to
+`HourFormat::TwentyFour` otherwise, so `--24h` gives the same result as no
+flag. Any unknown flag, any positional argument, or `--12h` and `--24h`
+together is a usage error.
 
 ### 5.3 `cute-clock/src/clock.rs`
 
@@ -607,6 +610,10 @@ pub struct Args {
     /// Show 12-hour time with an AM/PM marker instead of 24-hour time.
     #[arg(long = "12h")]
     pub twelve_hour: bool,
+
+    /// Show 24-hour time (the default).
+    #[arg(long = "24h", conflicts_with = "twelve_hour")]
+    pub twenty_four_hour: bool,
 }
 
 impl Args {
@@ -729,6 +736,7 @@ Usage: cute-clock [OPTIONS]
 
 Options:
       --12h      Show 12-hour time with an AM/PM marker instead of 24-hour time
+      --24h      Show 24-hour time (the default)
   -h, --help     Print help
   -V, --version  Print version
 ```
@@ -739,13 +747,24 @@ Exit codes:
 
 - `0`: the window was closed (close button or Ctrl+Q), or `--help` or
   `--version` was given.
-- `2`: a usage error, such as an unknown flag or any positional argument.
-  `clap` prints the error and usage to standard error, for example:
+- `2`: a usage error, such as an unknown flag, any positional argument, or
+  `--12h` and `--24h` together in either order. `clap` prints the error and
+  usage to standard error, for example:
 
   ```text
   error: unexpected argument '--bogus' found
 
   Usage: cute-clock [OPTIONS]
+
+  For more information, try '--help'.
+  ```
+
+  The conflict names both flags, first the one given first:
+
+  ```text
+  error: the argument '--12h' cannot be used with '--24h'
+
+  Usage: cute-clock --12h
 
   For more information, try '--help'.
   ```
@@ -845,8 +864,10 @@ use crate::face::HourFormat;
 <!-- markdownlint-enable MD013 -->
 
 - `clap::Parser` (its `try_parse_from`): `defaults_to_24_hour`,
-  `parses_12h_flag`, `rejects_unknown_flag`, `rejects_positional_argument`.
-- `HourFormat`: `defaults_to_24_hour`, `parses_12h_flag`.
+  `parses_12h_flag`, `parses_24h_flag`, `rejects_12h_with_24h`,
+  `rejects_24h_with_12h`, `rejects_unknown_flag`,
+  `rejects_positional_argument`.
+- `HourFormat`: `defaults_to_24_hour`, `parses_12h_flag`, `parses_24h_flag`.
 
 ### 7.2 `cute-clock/src/clock.rs`
 
@@ -918,7 +939,7 @@ const NANOS_PER_SEC: i32 = 1_000_000_000;
 - **Layout:** every test lives in an in-module `#[cfg(test)] mod tests` block
   with `use super::*`, at the end of its source file. None needs a display.
   Run them with `cargo test --locked` in `cute-clock/`.
-- **Count:** `cli.rs` 5, `clock.rs` 5, `face.rs` 9, `timing.rs` 9; 28 in
+- **Count:** `cli.rs` 9, `clock.rs` 5, `face.rs` 9, `timing.rs` 9; 32 in
   total. `lib.rs` and `main.rs` have none.
 
 ### 8.1 `cute-clock/src/cli.rs`
@@ -927,6 +948,13 @@ const NANOS_PER_SEC: i32 = 1_000_000_000;
   `HourFormat::TwentyFour`.
 - `parses_12h_flag`: `["cute-clock", "--12h"]` sets `twelve_hour` and gives
   `HourFormat::Twelve`.
+- `parses_24h_flag`: `["cute-clock", "--24h"]` sets `twenty_four_hour` and
+  gives `HourFormat::TwentyFour`.
+- `rejects_12h_with_24h`: `["cute-clock", "--12h", "--24h"]` fails with
+  `ErrorKind::ArgumentConflict` and exit code 2.
+- `rejects_24h_with_12h`: the same flags in the other order fail the same way.
+- `help_lists_24h_flag`: the line of `Args::command().render_help()` that holds
+  `--24h` contains `Show 24-hour time (the default)`.
 - `rejects_unknown_flag`: `--bogus` fails with `ErrorKind::UnknownArgument`
   and exit code 2.
 - `rejects_positional_argument`: `["cute-clock", "extra"]` is an error.
@@ -1021,3 +1049,6 @@ none
   by `/create-blueprint` and committed on its own (the reference blueprint
   that `verify-blueprint` and the `implement-github-issue` integration are
   tested against)
+- #7: added a `--24h` flag that selects the default 24-hour time explicitly
+  and conflicts with `--12h` (so an alias or script can state its hour format
+  either way; giving both flags is a usage error)
