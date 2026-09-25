@@ -25,3 +25,6 @@ go.work.sum
 .env
 
 .history
+
+# Rust build output
+target/
