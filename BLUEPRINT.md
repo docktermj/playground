@@ -28,6 +28,7 @@ It holds two experiments today:
 - `.github/workflows/test.yaml`: CI that generates and signs test certificates
   with `openssl`, see section 4.
 - `.gitignore`: ignore patterns, described below this list.
+- `BLUEPRINT.md`: this file, a single-file spec of the repository.
 - `LICENSE`: the license text, see section 9.
 - `README.md`: two lines, the heading `# playground` and the sentence
   `Just a place to try things`.
@@ -1016,3 +1017,7 @@ none
   tested `jiff` + `clap` library plus a thin binary, with its own CI workflow
   (a playful Ubuntu desktop clock; the split keeps all logic testable without
   a display)
+- #4: added `BLUEPRINT.md`, a single-file spec of the repository generated
+  by `/create-blueprint` and committed on its own (the reference blueprint
+  that `verify-blueprint` and the `implement-github-issue` integration are
+  tested against)
