@@ -28,7 +28,6 @@ It holds two experiments today:
 - `.github/workflows/test.yaml`: CI that generates and signs test certificates
   with `openssl`, see section 4.
 - `.gitignore`: ignore patterns, described below this list.
-- `BLUEPRINT.md`: this file, a single-file spec of the repository.
 - `LICENSE`: the license text, see section 9.
 - `README.md`: two lines, the heading `# playground` and the sentence
   `Just a place to try things`.
